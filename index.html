@@ -34,6 +34,7 @@
     body {
       margin: 0;
       min-height: 100%;
+      padding-bottom: 120px;
       font-family: "Trebuchet MS", "Segoe UI", Tahoma, sans-serif;
       color: var(--text);
       background:
@@ -632,6 +633,21 @@
       border-color: rgba(255, 88, 88, 0.62);
       background: linear-gradient(180deg, rgba(52, 10, 14, 0.92), rgba(26, 7, 10, 0.98));
       box-shadow: 0 0 28px rgba(255, 74, 74, 0.2);
+      color: #ffd8d8;
+    }
+
+    #eventBanner {
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      width: min(760px, calc(100% - 28px));
+      margin: 0;
+      z-index: 31;
+      pointer-events: none;
+      border-color: rgba(255, 88, 88, 0.62);
+      background: linear-gradient(180deg, rgba(52, 10, 14, 0.96), rgba(26, 7, 10, 0.99));
+      box-shadow: 0 18px 32px rgba(0, 0, 0, 0.34), 0 0 28px rgba(255, 64, 64, 0.22);
       color: #ffd8d8;
     }
 
@@ -2164,10 +2180,15 @@
     }
 
     .toast.system-message {
+      left: 50%;
+      right: auto;
+      bottom: 92px;
+      max-width: min(520px, calc(100% - 28px));
       background: linear-gradient(180deg, rgba(57, 12, 18, 0.98), rgba(26, 8, 11, 0.98));
       border-color: rgba(255, 90, 90, 0.62);
       box-shadow: 0 18px 32px rgba(0, 0, 0, 0.34), 0 0 26px rgba(255, 64, 64, 0.18);
       color: #ffd7d7;
+      transform: translate(-50%, 30px);
     }
 
     .toast.show {
@@ -2175,11 +2196,15 @@
       opacity: 1;
     }
 
+    .toast.system-message.show {
+      transform: translate(-50%, 0);
+    }
+
     .system-preview {
       position: fixed;
-      left: 18px;
-      bottom: 18px;
-      max-width: 280px;
+      left: 50%;
+      bottom: 156px;
+      max-width: min(520px, calc(100% - 28px));
       padding: 8px 10px;
       background: linear-gradient(180deg, rgba(57, 12, 18, 0.95), rgba(26, 8, 11, 0.96));
       border: 1px solid rgba(255, 90, 90, 0.52);
@@ -2190,15 +2215,16 @@
       letter-spacing: 0.04em;
       border-radius: 14px;
       opacity: 0;
-      transform: translateY(10px);
+      text-align: center;
+      transform: translate(-50%, 10px);
       transition: transform 0.2s ease, opacity 0.2s ease;
       pointer-events: none;
-      z-index: 29;
+      z-index: 32;
     }
 
     .system-preview.show {
       opacity: 1;
-      transform: translateY(0);
+      transform: translate(-50%, 0);
     }
 
     .didyouknow-box {
@@ -6489,7 +6515,7 @@
     const AUTOCLICK_SUSPICION_THRESHOLD = 100;
     const AUTOCLICK_WARNING_COOLDOWN_MS = 5000;
     const ADMIN_ABUSE_POST_GRACE_MS = 30000;
-    const ADMIN_ABUSE_AUDIO_SRC = "adm.mp3";
+    const ADMIN_ABUSE_AUDIO_SOURCES = ["adm.mp3", "adm2.mp3"];
     const ADMIN_ABUSE_MESSAGE_INTERVAL_MS = 35000;
     const ADMIN_ABUSE_MESSAGE_VISIBLE_MS = 10000;
     const ADMIN_ABUSE_PREANNOUNCE_MS = 12000;
@@ -6497,9 +6523,9 @@
     const ADMIN_ABUSE_CONFIG = {
   enabled: true,
   startDate: "01/04/2026",
-  startTime: "20:21",
+  startTime: "20:37",
   endDate: "01/04/2026",
-  endTime: "20:45",
+  endTime: "20:57",
 
   messages: [
     "ouesh les khey sa dis quoi",
@@ -6825,6 +6851,10 @@
       adminAbuseRuntime.shutdownApplied = false;
       adminAbuseRuntime.activeEffects = [];
       adminAbuseRuntime.wheelSpinning = false;
+      adminAbuseRuntime.currentAudioTrackIndex = 0;
+      adminAbuseRuntime.currentAudioTrackLabel = getAdminAbuseAudioTrackLabel(getAdminAbuseAudioSources()[0] || "adm.mp3");
+      adminAbuseRuntime.audioErrorCount = 0;
+      adminAbuseRuntime.audioMissing = false;
       if (adminAbuseRuntime.wheelResolveTimer) {
         clearTimeout(adminAbuseRuntime.wheelResolveTimer);
         adminAbuseRuntime.wheelResolveTimer = null;
@@ -6890,18 +6920,101 @@
       dirty.hud = true;
     }
 
+    function getAdminAbuseAudioSources() {
+      return ADMIN_ABUSE_AUDIO_SOURCES.map((src) => String(src || "").trim()).filter(Boolean);
+    }
+
+    function getAdminAbuseAudioTrackLabel(src) {
+      const safeSrc = String(src || "").trim();
+      if (!safeSrc) {
+        return "admin";
+      }
+      return safeSrc.split("/").pop().replace(/\.[^.]+$/, "") || "admin";
+    }
+
+    function setAdminAbuseAudioTrack(audio, trackIndex = 0) {
+      const playlist = getAdminAbuseAudioSources();
+      if (!audio || !playlist.length) {
+        adminAbuseRuntime.audioMissing = true;
+        dirty.event = true;
+        return false;
+      }
+      const normalizedIndex = ((Math.trunc(trackIndex) % playlist.length) + playlist.length) % playlist.length;
+      const nextSrc = playlist[normalizedIndex];
+      adminAbuseRuntime.currentAudioTrackIndex = normalizedIndex;
+      adminAbuseRuntime.currentAudioTrackLabel = getAdminAbuseAudioTrackLabel(nextSrc);
+      adminAbuseRuntime.audioMissing = false;
+      if (audio.dataset.adminTrackSrc !== nextSrc) {
+        audio.dataset.adminTrackSrc = nextSrc;
+        audio.src = nextSrc;
+        audio.load();
+      }
+      dirty.event = true;
+      return true;
+    }
+
+    function playAdminAbuseAudio(audio) {
+      if (!audio) {
+        return;
+      }
+      const playPromise = audio.play();
+      if (playPromise && typeof playPromise.catch === "function") {
+        playPromise.catch(() => {});
+      }
+    }
+
+    function cycleAdminAbuseAudioTrack(audio, autoplay = true) {
+      const playlist = getAdminAbuseAudioSources();
+      if (!audio || !playlist.length) {
+        adminAbuseRuntime.audioMissing = true;
+        dirty.event = true;
+        return false;
+      }
+      const currentIndex = Number.isInteger(adminAbuseRuntime.currentAudioTrackIndex)
+        ? adminAbuseRuntime.currentAudioTrackIndex
+        : 0;
+      setAdminAbuseAudioTrack(audio, currentIndex + 1);
+      if (autoplay) {
+        playAdminAbuseAudio(audio);
+      }
+      return true;
+    }
+
     function ensureAdminAbuseAudio() {
       if (adminAbuseAudio || typeof Audio !== "function") {
         return adminAbuseAudio;
       }
-      const audio = new Audio(ADMIN_ABUSE_AUDIO_SRC);
-      audio.loop = true;
+      const playlist = getAdminAbuseAudioSources();
+      if (!playlist.length) {
+        adminAbuseRuntime.audioMissing = true;
+        return null;
+      }
+      const audio = new Audio();
+      audio.loop = false;
       audio.preload = "auto";
       audio.volume = 0.42;
-      audio.addEventListener("error", () => {
-        adminAbuseRuntime.audioMissing = true;
+      audio.addEventListener("playing", () => {
+        adminAbuseRuntime.audioMissing = false;
+        adminAbuseRuntime.audioErrorCount = 0;
         dirty.event = true;
       });
+      audio.addEventListener("ended", () => {
+        adminAbuseRuntime.audioErrorCount = 0;
+        cycleAdminAbuseAudioTrack(audio, true);
+      });
+      audio.addEventListener("error", () => {
+        adminAbuseRuntime.audioErrorCount += 1;
+        if (adminAbuseRuntime.audioErrorCount >= playlist.length) {
+          adminAbuseRuntime.audioMissing = true;
+          audio.pause();
+          audio.removeAttribute("src");
+          audio.load();
+        } else {
+          cycleAdminAbuseAudioTrack(audio, getAdminAbusePhase(Date.now()).state === "active");
+        }
+        dirty.event = true;
+      });
+      setAdminAbuseAudioTrack(audio, 0);
       adminAbuseAudio = audio;
       return adminAbuseAudio;
     }
@@ -6917,16 +7030,17 @@
       if (!shouldPlay) {
         if (!audio.paused) {
           audio.pause();
-          audio.currentTime = 0;
+        }
+        audio.currentTime = 0;
+        adminAbuseRuntime.audioErrorCount = 0;
+        if (adminAbuseRuntime.currentAudioTrackIndex !== 0) {
+          setAdminAbuseAudioTrack(audio, 0);
         }
         return;
       }
 
       if (forcedByGesture || audio.paused) {
-        const playPromise = audio.play();
-        if (playPromise && typeof playPromise.catch === "function") {
-          playPromise.catch(() => {});
-        }
+        playAdminAbuseAudio(audio);
       }
     }
 
@@ -6973,12 +7087,13 @@
         effects.push({ label: effect.label, hot: effect.hot });
       });
 
+      const audioPlaylistLabel = getAdminAbuseAudioSources().map((src) => getAdminAbuseAudioTrackLabel(src)).join(" + ");
       effects.push({
         label: adminAbuseRuntime.audioMissing
-          ? "Musique admin indisponible (adm.mp3 manquant)"
+          ? `Musique admin indisponible (${audioPlaylistLabel})`
           : adminAbuseAudio && !adminAbuseAudio.paused
-            ? "Musique admin en boucle"
-            : "Musique admin prete",
+            ? `Musique admin: ${adminAbuseRuntime.currentAudioTrackLabel || audioPlaylistLabel}`
+            : `Musique admin prete (${audioPlaylistLabel})`,
         hot: !adminAbuseRuntime.audioMissing
       });
 
@@ -8540,6 +8655,9 @@
       wheelSpinning: false,
       wheelResolveTimer: null,
       wheelHideTimer: null,
+      currentAudioTrackIndex: 0,
+      currentAudioTrackLabel: "adm",
+      audioErrorCount: 0,
       audioMissing: false,
       audioErrorShown: false
     };
