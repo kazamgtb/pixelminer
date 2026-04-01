@@ -2180,18 +2180,21 @@
     }
 
     .toast.system-message {
-      left: 50%;
-      right: auto;
-      top: 84px;
-      bottom: auto;
-      max-width: min(520px, calc(100% - 28px));
+      left: auto;
+      right: 18px;
+      top: auto;
+      bottom: 84px;
+      max-width: min(320px, calc(100% - 28px));
+      padding: 10px 12px;
       background: linear-gradient(180deg, rgba(57, 12, 18, 0.98), rgba(26, 8, 11, 0.98));
       border-color: rgba(255, 90, 90, 0.62);
       box-shadow: 0 18px 32px rgba(0, 0, 0, 0.34), 0 0 26px rgba(255, 64, 64, 0.18);
       color: #ffd7d7;
-      text-align: center;
-      transform: translate(-50%, 30px);
-      z-index: 91;
+      text-align: left;
+      font-size: 0.78rem;
+      line-height: 1.35;
+      transform: translateY(18px);
+      z-index: 141;
     }
 
     .toast.show {
@@ -2200,7 +2203,7 @@
     }
 
     .toast.system-message.show {
-      transform: translate(-50%, 0);
+      transform: translateY(0);
     }
 
     .system-preview {
@@ -6526,7 +6529,7 @@
     const ADMIN_ABUSE_CONFIG = {
   enabled: true,
   startDate: "01/04/2026",
-  startTime: "21:16",
+  startTime: "21:21",
   endDate: "01/04/2026",
   endTime: "21:30",
 
@@ -7149,9 +7152,15 @@
     }
 
     function setAdminAbuseBannerMessage(message, visibleSeconds = 12, toast = false, hotSeconds = visibleSeconds) {
-      adminAbuseRuntime.bannerMessage = String(message || "").trim();
+      const safeMessage = String(message || "").trim();
+      adminAbuseRuntime.bannerMessage = safeMessage;
       adminAbuseRuntime.bannerVisibleUntil = Date.now() + (Math.max(1, visibleSeconds) * 1000);
       adminAbuseRuntime.bannerHotUntil = Date.now() + (Math.max(1, hotSeconds) * 1000);
+      if (safeMessage && isSystemMessage(safeMessage)) {
+        showToast(safeMessage, Math.max(1, visibleSeconds) * 1000);
+      } else if (toast && safeMessage) {
+        showToast(safeMessage, Math.max(1, visibleSeconds) * 1000);
+      }
       dirty.event = true;
       dirty.hud = true;
     }
@@ -7721,49 +7730,13 @@
         return null;
       }
 
-      if (phase.state === "upcoming") {
-        const remaining = phase.windowInfo.startAt - nowMs;
-        if (remaining > 0 && remaining <= 3600000) {
-          return {
-            text: "System : vague admin bientot en ligne.",
-            hot: remaining <= 60000,
-            countdown: false
-          };
-        }
-        return null;
-      }
-
-      if (adminAbuseRuntime.countdown && nowMs < adminAbuseRuntime.countdown.endsAt) {
-        return {
-          text: `System : ${adminAbuseRuntime.countdown.label}.`,
-          hot: true,
-          countdown: false
-        };
-      }
-
-      if (adminAbuseRuntime.wheelSpinning) {
-        return {
-          text: "System : roulette finale en cours...",
-          hot: true,
-          countdown: false
-        };
-      }
-
-      if (phase.state === "ending") {
-        return {
-          text: "System : l'admin abuse est termine, tous les events sont coupes.",
-          hot: true,
-          countdown: false
-        };
-      }
-
       if (phase.state === "active") {
-        const message = String(adminAbuseRuntime.bannerMessage || "System : la mine reste sous pression.").trim();
+        const message = String(adminAbuseRuntime.bannerMessage || "").trim();
         if (nowMs > adminAbuseRuntime.bannerVisibleUntil) {
           return null;
         }
-        const noticeText = hasNoticePrefix(message) ? message : `System : ${message}`;
-        if (!isSystemMessage(noticeText)) {
+        const noticeText = hasNoticePrefix(message) ? message : `Admin : ${message}`;
+        if (!isAdminMessage(noticeText)) {
           return null;
         }
         return {
@@ -10006,24 +9979,22 @@
     }
 
     function showSystemPreview(message, visibleSeconds = 10) {
-      if (!dom.systemPreview) {
-        return;
-      }
       const safeMessage = withSystemPrefix(message);
       if (!safeMessage) {
         return;
       }
-      dom.systemPreview.textContent = safeMessage;
-      dom.systemPreview.classList.add("show");
       if (systemPreviewTimeout) {
         clearTimeout(systemPreviewTimeout);
+        systemPreviewTimeout = null;
       }
-      systemPreviewTimeout = window.setTimeout(() => {
+      if (dom.systemPreview) {
         dom.systemPreview.classList.remove("show");
-      }, Math.max(1, visibleSeconds) * 1000);
+        dom.systemPreview.textContent = "";
+      }
+      showToast(safeMessage, Math.max(1, visibleSeconds) * 1000);
     }
 
-    function showToast(message) {
+    function showToast(message, durationMs = 2800) {
       const now = Date.now();
       if (message === lastToastMessage && (now - lastToastAt) < TOAST_MIN_INTERVAL_MS) {
         return;
@@ -10038,7 +10009,7 @@
       }
       toastTimeout = window.setTimeout(() => {
         dom.toast.classList.remove("show");
-      }, 2800);
+      }, Math.max(400, Number(durationMs) || 2800));
     }
 
     function renderDidYouKnow() {
