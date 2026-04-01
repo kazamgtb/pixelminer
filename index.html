@@ -643,7 +643,7 @@
       transform: translateX(-50%);
       width: min(760px, calc(100% - 28px));
       margin: 0;
-      z-index: 90;
+      z-index: 140;
       pointer-events: none;
       border-color: rgba(255, 88, 88, 0.62);
       background: linear-gradient(180deg, rgba(52, 10, 14, 0.96), rgba(26, 7, 10, 0.99));
@@ -5705,6 +5705,7 @@
 </head>
 <body>
   <div class="global-admin-banner hidden" id="globalAdminBanner" aria-live="polite"></div>
+  <div class="event-banner" id="eventBanner" aria-live="polite" style="display:none"></div>
   
   <div class="app-shell">
     <aside class="didyouknow-box" id="didYouKnowBox" aria-live="polite">
@@ -5785,8 +5786,6 @@
 
     <main class="main-grid">
       <section class="panel arena-panel">
-        <div class="event-banner" id="eventBanner" aria-live="polite" style="display:none"></div>
-
         <div class="arena-core" id="arenaCore">
           <div class="arena-floor"></div>
           <div class="global-effect-layer" id="globalEffectLayer"></div>
@@ -6527,9 +6526,9 @@
     const ADMIN_ABUSE_CONFIG = {
   enabled: true,
   startDate: "01/04/2026",
-  startTime: "20:46",
+  startTime: "21:16",
   endDate: "01/04/2026",
-  endTime: "20:55",
+  endTime: "21:30",
 
   messages: [
     "ouesh les khey sa dis quoi",
@@ -7166,7 +7165,7 @@
       if (hasNoticePrefix(safeText)) {
         return safeText;
       }
-      return action?.type === "announce" ? `Admin : ${safeText}` : `System : ${safeText}`;
+      return (customText || action?.type === "announce") ? `Admin : ${safeText}` : `System : ${safeText}`;
     }
 
     function showAdminActionBannerMessage(action, fallbackText, visibleSeconds = 12, toast = false, hotSeconds = visibleSeconds) {
@@ -7588,6 +7587,10 @@
 
       const description = describeUpcomingAdminAction(upcomingAction);
       if (!description) {
+        return false;
+      }
+      if (String(upcomingAction?.adminMessage || "").trim() || upcomingAction?.type === "announce") {
+        adminAbuseRuntime.previewedActionId = upcomingAction.id;
         return false;
       }
 
