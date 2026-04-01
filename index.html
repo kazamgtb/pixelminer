@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
@@ -6497,9 +6497,9 @@
     const ADMIN_ABUSE_CONFIG = {
   enabled: true,
   startDate: "01/04/2026",
-  startTime: "18:40",
+  startTime: "18:45",
   endDate: "01/04/2026",
-  endTime: "18:50",
+  endTime: "18:55",
 
   messages: [
     "ouesh les khey sa dis quoi",
@@ -7041,7 +7041,13 @@
     function buildAdminActionBannerMessage(action, fallbackText = "") {
       const customText = String(action?.adminMessage || "").trim();
       const safeText = customText || String(fallbackText || "").trim();
-      return safeText ? `Admin : ${safeText}` : "";
+      if (!safeText) {
+        return "";
+      }
+      if (hasNoticePrefix(safeText)) {
+        return safeText;
+      }
+      return action?.type === "announce" ? `Admin : ${safeText}` : `System : ${safeText}`;
     }
 
     function showAdminActionBannerMessage(action, fallbackText, visibleSeconds = 12, toast = false, hotSeconds = visibleSeconds) {
@@ -7112,7 +7118,7 @@
         endsAt: Date.now() + safeDurationMs
       });
       pushAdminEffectBadge(`Luck x${safeMultiplier}`, safeDurationMs, true);
-      setAdminAbuseBannerMessage(`Admin : Boost de luck x${safeMultiplier} active pendant ${formatDuration(safeDurationMs)}.`, 10, true);
+      setAdminAbuseBannerMessage(`System : Boost de luck x${safeMultiplier} active pendant ${formatDuration(safeDurationMs)}.`, 10, true);
     }
 
     function activateAdminGameplayBoost(multiplier, durationMs) {
@@ -7127,7 +7133,7 @@
       dirty.hud = true;
       dirty.event = true;
       pushAdminEffectBadge(`Boost admin x${formatFactor(safeMultiplier, 1)}`, safeDurationMs, true);
-      setAdminAbuseBannerMessage(`Admin : Boost x${formatFactor(safeMultiplier, 1)} pendant ${formatDuration(safeDurationMs)}.`, 10, true);
+      setAdminAbuseBannerMessage(`System : Boost x${formatFactor(safeMultiplier, 1)} pendant ${formatDuration(safeDurationMs)}.`, 10, true);
     }
 
     function triggerAdminJackpotWave(chargeAmount = 100) {
@@ -7135,7 +7141,7 @@
       dirty.hud = true;
       dirty.arcade = true;
       pushAdminEffectBadge(`Jackpot wave ${Math.round(Math.max(1, Number(chargeAmount) || 100))}`, 9000, true);
-      setAdminAbuseBannerMessage("Admin : vague jackpot envoyee sur la mine !", 10, true);
+      setAdminAbuseBannerMessage("System : vague jackpot envoyee sur la mine !", 10, true);
     }
 
     function triggerAdminCacheRain(multiplier = 3) {
@@ -7143,7 +7149,7 @@
       dirty.hud = true;
       dirty.arcade = true;
       pushAdminEffectBadge(`Cache rain x${Math.max(1, Number(multiplier) || 1)}`, 9000, true);
-      setAdminAbuseBannerMessage(`Admin : pluie de cache x${Math.max(1, Number(multiplier) || 1)} !`, 10, false);
+      setAdminAbuseBannerMessage(`System : pluie de cache x${Math.max(1, Number(multiplier) || 1)} !`, 10, false);
     }
 
     function triggerAdminFrenzyBurst() {
@@ -7153,7 +7159,7 @@
         dirty.arcade = true;
       }
       pushAdminEffectBadge("Frenesie admin", 12000, true);
-      setAdminAbuseBannerMessage("Admin : frenesie relancee sur la session !", 10, true);
+      setAdminAbuseBannerMessage("System : frenesie relancee sur la session !", 10, true);
     }
 
     function shutdownAdminAbuseEvents() {
@@ -7193,7 +7199,7 @@
       dirty.hud = true;
       dirty.event = true;
       if (notify) {
-        showToast(`Admin : ${eventDefinition.name} active !`);
+        showToast(`System : ${eventDefinition.name} active !`);
       }
       pushAdminEffectBadge(`${eventDefinition.name} actif`, 12000, true);
       triggerGlobalBurst(1.45, true);
@@ -7266,7 +7272,7 @@
       void dom.adminWheelDisc.offsetWidth;
       dom.adminWheelDisc.style.transition = "transform 3.4s cubic-bezier(0.12, 0.9, 0.2, 1)";
       dom.adminWheelDisc.style.transform = `rotate(${totalRotation}deg)`;
-      setAdminAbuseBannerMessage("Admin : roue finale en cours...", 6, false);
+      setAdminAbuseBannerMessage("System : roue finale en cours...", 6, false);
 
       adminAbuseRuntime.wheelResolveTimer = window.setTimeout(() => {
         forceActivateOreEvent(winner, false);
@@ -7277,7 +7283,7 @@
           dom.adminWheelStatus.textContent = "Le dernier filon est tombe. Fonce le casser.";
         }
         adminAbuseRuntime.lingerUntil = Math.max(adminAbuseRuntime.lingerUntil, Date.now() + 9000);
-        setAdminAbuseBannerMessage(`Admin : ${winner.name} active !`, 12, true);
+        setAdminAbuseBannerMessage(`System : ${winner.name} active !`, 12, true);
         adminAbuseRuntime.wheelSpinning = false;
         adminAbuseRuntime.wheelResolveTimer = null;
         adminAbuseRuntime.wheelHideTimer = window.setTimeout(() => {
@@ -7398,9 +7404,9 @@
 
       if (isSelected) {
         forceActivateOreEvent(eventDefinition, false);
-        setAdminAbuseBannerMessage(`Admin : ${eventDefinition.name} SPAWNED`, 10, true);
+        setAdminAbuseBannerMessage(`System : ${eventDefinition.name} SPAWNED`, 10, true);
       } else {
-        setAdminAbuseBannerMessage(`Admin : ${eventDefinition.name} SPAWNED pour une autre partie de la mine.`, 10, true);
+        setAdminAbuseBannerMessage(`System : ${eventDefinition.name} SPAWNED pour une autre partie de la mine.`, 10, true);
       }
     }
 
@@ -7607,7 +7613,7 @@
 
       if (adminAbuseRuntime.countdown && nowMs < adminAbuseRuntime.countdown.endsAt) {
         return {
-          text: `Admin : ${adminAbuseRuntime.countdown.label}.`,
+          text: `System : ${adminAbuseRuntime.countdown.label}.`,
           hot: true,
           countdown: false
         };
@@ -7615,7 +7621,7 @@
 
       if (adminAbuseRuntime.wheelSpinning) {
         return {
-          text: "Admin : roulette finale en cours...",
+          text: "System : roulette finale en cours...",
           hot: true,
           countdown: false
         };
@@ -12021,7 +12027,7 @@
         dom.eventBanner.innerHTML = `
           <strong class="event-banner-title">System : fin de vague, les activations se coupent.</strong>
           <div class="event-banner-meta">
-            <span class="event-banner-chip hot">Tous les boosts admin sont en train de retomber</span>
+            <span class="event-banner-chip hot">Tous les boosts systeme sont en train de retomber</span>
           </div>
         `;
       } else {
