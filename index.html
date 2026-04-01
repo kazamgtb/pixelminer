@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
@@ -6497,9 +6497,9 @@
     const ADMIN_ABUSE_CONFIG = {
   enabled: true,
   startDate: "01/04/2026",
-  startTime: "18:30",
+  startTime: "18:40",
   endDate: "01/04/2026",
-  endTime: "18:40",
+  endTime: "18:50",
 
   messages: [
     "ouesh les khey sa dis quoi",
@@ -7161,7 +7161,7 @@
       adminAbuseRuntime.countdown = null;
       adminAbuseRuntime.bannerVisibleUntil = Date.now() + 8000;
       adminAbuseRuntime.bannerHotUntil = Date.now() + 8000;
-      adminAbuseRuntime.bannerMessage = "Admin abuse termine. Tous les events admin ont ete coupes.";
+      adminAbuseRuntime.bannerMessage = "System : l'admin abuse est termine, tous les events sont coupes.";
       adminAbuseRuntime.wheelSpinning = false;
       if (adminAbuseRuntime.wheelResolveTimer) {
         clearTimeout(adminAbuseRuntime.wheelResolveTimer);
@@ -7597,7 +7597,7 @@
         const remaining = phase.windowInfo.startAt - nowMs;
         if (remaining > 0 && remaining <= 3600000) {
           return {
-            text: "Admin : vague admin bientot en ligne.",
+            text: "System : vague admin bientot en ligne.",
             hot: remaining <= 60000,
             countdown: false
           };
@@ -7623,19 +7623,19 @@
 
       if (phase.state === "ending") {
         return {
-          text: "Admin : l'admin abuse est termine, tous les events admin sont coupes.",
+          text: "System : l'admin abuse est termine, tous les events sont coupes.",
           hot: true,
           countdown: false
         };
       }
 
       if (phase.state === "active") {
-        const message = String(adminAbuseRuntime.bannerMessage || "Admin : la mine reste sous pression.").trim();
+        const message = String(adminAbuseRuntime.bannerMessage || "System : la mine reste sous pression.").trim();
         if (nowMs > adminAbuseRuntime.bannerVisibleUntil) {
           return null;
         }
         return {
-          text: /^Admin\s:/i.test(message) ? message : `Admin : ${message}`,
+          text: hasNoticePrefix(message) ? message : `System : ${message}`,
           hot: true,
           countdown: false
         };
@@ -9842,6 +9842,10 @@
       return /^System\s*:/i.test(String(message || "").trim());
     }
 
+    function hasNoticePrefix(message) {
+      return /^(Admin|System)\s*:/i.test(String(message || "").trim());
+    }
+
     function getEventThemeClasses() {
       return [
         "system-message"
@@ -12007,7 +12011,7 @@
         const title = String(adminAbuseRuntime.bannerMessage || "Admin abuse en cours.").trim();
         dom.eventBanner.classList.add("hot", "admin-abuse");
         dom.eventBanner.innerHTML = `
-          <strong class="event-banner-title">${/^Admin\s:/i.test(title) ? title : `Admin : ${title}`}</strong>
+          <strong class="event-banner-title">${hasNoticePrefix(title) ? title : `System : ${title}`}</strong>
           <div class="event-banner-meta">
             ${adminEffects.map((effect) => `<span class="event-banner-chip${effect.hot ? " hot" : ""}">${effect.label}</span>`).join("")}
           </div>
@@ -12015,7 +12019,7 @@
       } else if (adminPhase.state === "ending") {
         dom.eventBanner.classList.add("hot", "admin-abuse");
         dom.eventBanner.innerHTML = `
-          <strong class="event-banner-title">Admin : fin de vague, les activations se coupent.</strong>
+          <strong class="event-banner-title">System : fin de vague, les activations se coupent.</strong>
           <div class="event-banner-meta">
             <span class="event-banner-chip hot">Tous les boosts admin sont en train de retomber</span>
           </div>
