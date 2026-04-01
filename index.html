@@ -643,7 +643,7 @@
       transform: translateX(-50%);
       width: min(760px, calc(100% - 28px));
       margin: 0;
-      z-index: 31;
+      z-index: 90;
       pointer-events: none;
       border-color: rgba(255, 88, 88, 0.62);
       background: linear-gradient(180deg, rgba(52, 10, 14, 0.96), rgba(26, 7, 10, 0.99));
@@ -2182,13 +2182,16 @@
     .toast.system-message {
       left: 50%;
       right: auto;
-      bottom: 92px;
+      top: 84px;
+      bottom: auto;
       max-width: min(520px, calc(100% - 28px));
       background: linear-gradient(180deg, rgba(57, 12, 18, 0.98), rgba(26, 8, 11, 0.98));
       border-color: rgba(255, 90, 90, 0.62);
       box-shadow: 0 18px 32px rgba(0, 0, 0, 0.34), 0 0 26px rgba(255, 64, 64, 0.18);
       color: #ffd7d7;
+      text-align: center;
       transform: translate(-50%, 30px);
+      z-index: 91;
     }
 
     .toast.show {
@@ -2203,7 +2206,8 @@
     .system-preview {
       position: fixed;
       left: 50%;
-      bottom: 156px;
+      top: 146px;
+      bottom: auto;
       max-width: min(520px, calc(100% - 28px));
       padding: 8px 10px;
       background: linear-gradient(180deg, rgba(57, 12, 18, 0.95), rgba(26, 8, 11, 0.96));
@@ -2219,7 +2223,7 @@
       transform: translate(-50%, 10px);
       transition: transform 0.2s ease, opacity 0.2s ease;
       pointer-events: none;
-      z-index: 32;
+      z-index: 92;
     }
 
     .system-preview.show {
@@ -5311,9 +5315,9 @@
   animation: adminBannerPulse 0.8s steps(2, end) infinite;
 }
 
-.global-admin-banner {
-  position: fixed;
-  top: 12px;
+    .global-admin-banner {
+      position: fixed;
+      top: 12px;
   left: 50%;
   transform: translateX(-50%);
   width: min(760px, calc(100% - 28px));
@@ -5325,7 +5329,7 @@
     linear-gradient(180deg, rgba(255, 202, 66, 0.96), rgba(214, 153, 32, 0.96));
   color: #3b2108;
   box-shadow: 0 18px 42px rgba(0, 0, 0, 0.34), 0 0 0 2px rgba(255, 248, 207, 0.24);
-  z-index: 70;
+      z-index: 95;
   pointer-events: none;
   text-align: center;
   font-size: 0.88rem;
@@ -5781,7 +5785,7 @@
 
     <main class="main-grid">
       <section class="panel arena-panel">
-        <div class="event-banner system-message" id="eventBanner">System : Events orbe desactives. Events filon rares actifs.</div>
+        <div class="event-banner" id="eventBanner" aria-live="polite" style="display:none"></div>
 
         <div class="arena-core" id="arenaCore">
           <div class="arena-floor"></div>
@@ -6523,9 +6527,9 @@
     const ADMIN_ABUSE_CONFIG = {
   enabled: true,
   startDate: "01/04/2026",
-  startTime: "20:37",
+  startTime: "20:46",
   endDate: "01/04/2026",
-  endTime: "20:57",
+  endTime: "20:55",
 
   messages: [
     "ouesh les khey sa dis quoi",
@@ -7755,8 +7759,12 @@
         if (nowMs > adminAbuseRuntime.bannerVisibleUntil) {
           return null;
         }
+        const noticeText = hasNoticePrefix(message) ? message : `System : ${message}`;
+        if (!isSystemMessage(noticeText)) {
+          return null;
+        }
         return {
-          text: hasNoticePrefix(message) ? message : `System : ${message}`,
+          text: noticeText,
           hot: true,
           countdown: false
         };
@@ -9966,8 +9974,26 @@
       return /^System\s*:/i.test(String(message || "").trim());
     }
 
+    function isAdminMessage(message) {
+      return /^Admin\s*:/i.test(String(message || "").trim());
+    }
+
     function hasNoticePrefix(message) {
       return /^(Admin|System)\s*:/i.test(String(message || "").trim());
+    }
+
+    function getBottomAdminBannerTitle(message) {
+      const safeMessage = String(message || "").trim();
+      if (isAdminMessage(safeMessage)) {
+        return safeMessage;
+      }
+      if (!safeMessage || isSystemMessage(safeMessage)) {
+        return "Admin : admin abuse en cours.";
+      }
+      if (hasNoticePrefix(safeMessage)) {
+        return safeMessage;
+      }
+      return `Admin : ${safeMessage}`;
     }
 
     function getEventThemeClasses() {
@@ -12131,26 +12157,32 @@
       dom.eventBanner.classList.remove("hot", "admin-abuse", "admin-countdown", ...getEventThemeClasses());
       const adminPhase = getAdminAbusePhase();
       const adminEffects = getAdminAbuseStatusEffects();
-      if (adminPhase.state === "active" && adminEffects.length) {
-        const title = String(adminAbuseRuntime.bannerMessage || "Admin abuse en cours.").trim();
+      if (adminPhase.state === "active") {
+        const title = getBottomAdminBannerTitle(adminAbuseRuntime.bannerMessage || "Admin : admin abuse en cours.");
+        const bannerEffects = adminEffects.length
+          ? adminEffects
+          : [{ label: "Vague admin en cours", hot: true }];
         dom.eventBanner.classList.add("hot", "admin-abuse");
+        dom.eventBanner.style.display = "";
         dom.eventBanner.innerHTML = `
-          <strong class="event-banner-title">${hasNoticePrefix(title) ? title : `System : ${title}`}</strong>
+          <strong class="event-banner-title">${title}</strong>
           <div class="event-banner-meta">
-            ${adminEffects.map((effect) => `<span class="event-banner-chip${effect.hot ? " hot" : ""}">${effect.label}</span>`).join("")}
+            ${bannerEffects.map((effect) => `<span class="event-banner-chip${effect.hot ? " hot" : ""}">${effect.label}</span>`).join("")}
           </div>
         `;
       } else if (adminPhase.state === "ending") {
         dom.eventBanner.classList.add("hot", "admin-abuse");
+        dom.eventBanner.style.display = "";
         dom.eventBanner.innerHTML = `
-          <strong class="event-banner-title">System : fin de vague, les activations se coupent.</strong>
+          <strong class="event-banner-title">Admin : fin de vague, retombee en cours.</strong>
           <div class="event-banner-meta">
             <span class="event-banner-chip hot">Tous les boosts systeme sont en train de retomber</span>
           </div>
         `;
       } else {
-        dom.eventBanner.classList.add("system-message");
-        dom.eventBanner.textContent = withSystemPrefix("Events orbe desactives. Events filon rares actifs.");
+        dom.eventBanner.textContent = "";
+        dom.eventBanner.innerHTML = "";
+        dom.eventBanner.style.display = "none";
       }
       state.activeEvent = null;
       dom.eventOrb.classList.add("hidden");
