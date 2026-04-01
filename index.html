@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
@@ -2173,6 +2173,32 @@
     .toast.show {
       transform: translateY(0);
       opacity: 1;
+    }
+
+    .system-preview {
+      position: fixed;
+      left: 18px;
+      bottom: 18px;
+      max-width: 280px;
+      padding: 8px 10px;
+      background: linear-gradient(180deg, rgba(57, 12, 18, 0.95), rgba(26, 8, 11, 0.96));
+      border: 1px solid rgba(255, 90, 90, 0.52);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.28), 0 0 18px rgba(255, 64, 64, 0.14);
+      color: #ffd7d7;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      border-radius: 14px;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: transform 0.2s ease, opacity 0.2s ease;
+      pointer-events: none;
+      z-index: 29;
+    }
+
+    .system-preview.show {
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .didyouknow-box {
@@ -6017,6 +6043,7 @@
     </main>
   </div>
 
+  <div class="system-preview" id="systemPreview" aria-live="polite"></div>
   <div class="toast" id="toast"></div>
   <div class="screen-flash" id="screenFlash"></div>
   <section class="hebs-ban-page hidden" id="hebsBanPage" aria-hidden="true">
@@ -6470,9 +6497,9 @@
     const ADMIN_ABUSE_CONFIG = {
   enabled: true,
   startDate: "01/04/2026",
-  startTime: "17:57",
+  startTime: "18:30",
   endDate: "01/04/2026",
-  endTime: "18:07",
+  endTime: "18:40",
 
   messages: [
     "ouesh les khey sa dis quoi",
@@ -6480,11 +6507,11 @@
     "yo cyprien et yo noé bruh",
     "donovan et mehann, je tenais a vous précisez que vous n'etes pas les main characters a utilisé un autoclicker, notre anticheat a été update btw",
     "ceux qui font l'admin abuse venait me voir a la fin",
-    "la durée est de 20 minutes les frro",
+    "la durée est courte les frro, gardez un oeil sur le compteur",
     "bon, on est ready ou quoi !!!",
     "(oui oui c'est bien gabriel qui a dev le jeu pour ceux qui ne me croivent pas lol)",
     "on dirait que la mine va exploserr",
-    "luck x500 a la fin btw",
+    "gros pic de luck a la fin btw, mais c'est plus reequilibre",
     "regardez les infos du jeu pour voir les event, si quelqu'un a le mystery, c'est juste le plus rare et tu es tres chanceux",
     "bon, on casse tout ou kw ???",
     "rolololo je suis le goat.",
@@ -6494,54 +6521,54 @@
   
   scriptedActions: [
     { atPercent: 2, type: "announce", message: "allez, less go" },
-    { atPercent: 3.5, type: "jackpot_wave", charge: 250 },
-    { atPercent: 5, type: "boost_stack", multiplier: 10, durationSeconds: 40 },
-    { atPercent: 7, type: "cache_rain", multiplier: 4 },
+    { atPercent: 3.5, type: "jackpot_wave", charge: 140 },
+    { atPercent: 5, type: "boost_stack", multiplier: 4, durationSeconds: 32 },
+    { atPercent: 7, type: "cache_rain", multiplier: 2 },
     { atPercent: 9, type: "announce", message: "jvous est préparé une dinguerie" },
-    { atPercent: 10.5, type: "luck_boost", multiplier: 25, durationSeconds: 45 },
-    { atPercent: 12.5, type: "spawn_share_event", eventId: "azure_1_200", share: 0.7, countdownSeconds: 10 },
+    { atPercent: 10.5, type: "luck_boost", multiplier: 8, durationSeconds: 36 },
+    { atPercent: 12.5, type: "spawn_share_event", eventId: "azure_1_200", share: 0.45, countdownSeconds: 10 },
     { atPercent: 14.5, type: "spawn_everyone_event", eventId: "gold_1_5" },
-    { atPercent: 16.5, type: "jackpot_wave", charge: 420 },
+    { atPercent: 16.5, type: "jackpot_wave", charge: 240 },
     { atPercent: 18.5, type: "frenzy_burst" },
-    { atPercent: 20.5, type: "cache_rain", multiplier: 6 },
+    { atPercent: 20.5, type: "cache_rain", multiplier: 3 },
     { atPercent: 24, type: "announce", message: "c'est que le debut..." },
-    { atPercent: 26, type: "boost_stack", multiplier: 18, durationSeconds: 50 },
+    { atPercent: 26, type: "boost_stack", multiplier: 6, durationSeconds: 36 },
     { atPercent: 28, type: "spawn_everyone_event", eventId: "amber_1_20" },
-    { atPercent: 30, type: "jackpot_wave", charge: 700 },
-    { atPercent: 32, type: "luck_boost", multiplier: 40, durationSeconds: 38 },
-    { atPercent: 34, type: "spawn_share_event", eventId: "obsidian_1_5000", share: 0.45, countdownSeconds: 10 },
-    { atPercent: 36, type: "cache_rain", multiplier: 10 },
+    { atPercent: 30, type: "jackpot_wave", charge: 420 },
+    { atPercent: 32, type: "luck_boost", multiplier: 12, durationSeconds: 32 },
+    { atPercent: 34, type: "spawn_share_event", eventId: "obsidian_1_5000", share: 0.25, countdownSeconds: 10 },
+    { atPercent: 36, type: "cache_rain", multiplier: 4 },
     { atPercent: 38, type: "frenzy_burst" },
-    { atPercent: 40, type: "boost_stack", multiplier: 24, durationSeconds: 46 },
+    { atPercent: 40, type: "boost_stack", multiplier: 8, durationSeconds: 34 },
     { atPercent: 42, type: "spawn_everyone_event", eventId: "gold_1_5" },
-    { atPercent: 45, type: "jackpot_wave", charge: 1000 },
+    { atPercent: 45, type: "jackpot_wave", charge: 650 },
     { atPercent: 48, type: "announce", message: "on est a la moitié !!!" },
-    { atPercent: 50, type: "luck_boost", multiplier: 70, durationSeconds: 42 },
-    { atPercent: 52, type: "cache_rain", multiplier: 14 },
-    { atPercent: 54, type: "boost_stack", multiplier: 30, durationSeconds: 55 },
+    { atPercent: 50, type: "luck_boost", multiplier: 18, durationSeconds: 34 },
+    { atPercent: 52, type: "cache_rain", multiplier: 5 },
+    { atPercent: 54, type: "boost_stack", multiplier: 10, durationSeconds: 40 },
     { atPercent: 56, type: "spawn_everyone_event", eventId: "amber_1_20" },
-    { atPercent: 58, type: "spawn_share_event", eventId: "obsidian_1_5000", share: 0.6, countdownSeconds: 10 },
-    { atPercent: 60, type: "jackpot_wave", charge: 1450 },
+    { atPercent: 58, type: "spawn_share_event", eventId: "obsidian_1_5000", share: 0.35, countdownSeconds: 10 },
+    { atPercent: 60, type: "jackpot_wave", charge: 900 },
     { atPercent: 62, type: "frenzy_burst" },
     { atPercent: 64, type: "spawn_everyone_event", eventId: "obsidian_1_5000" },
-    { atPercent: 66, type: "cache_rain", multiplier: 18 },
-    { atPercent: 68, type: "boost_stack", multiplier: 42, durationSeconds: 50 },
-    { atPercent: 70, type: "luck_boost", multiplier: 120, durationSeconds: 34 },
-    { atPercent: 72, type: "jackpot_wave", charge: 2200 },
+    { atPercent: 66, type: "cache_rain", multiplier: 6 },
+    { atPercent: 68, type: "boost_stack", multiplier: 12, durationSeconds: 38 },
+    { atPercent: 70, type: "luck_boost", multiplier: 28, durationSeconds: 28 },
+    { atPercent: 72, type: "jackpot_wave", charge: 1300 },
     { atPercent: 74, type: "spawn_everyone_event", eventId: "gold_1_5" },
     { atPercent: 76, type: "announce", message: "on fais spawn un prismatic? nan... ça serai trop gros... ???" },
     { atPercent: 78, type: "spawn_everyone_event", eventId: "prismatic_1_10000", adminMessage: "Prismatic spawn avec succès !" },
-    { atPercent: 80, type: "spawn_share_event", eventId: "prismatic_1_10000", share: 1.0, countdownSeconds: 10 },
-    { atPercent: 82, type: "jackpot_wave", charge: 3000 },
-    { atPercent: 84, type: "luck_boost", multiplier: 180, durationSeconds: 28 },
-    { atPercent: 86, type: "cache_rain", multiplier: 26 },
+    { atPercent: 80, type: "spawn_share_event", eventId: "prismatic_1_10000", share: 0.35, countdownSeconds: 10 },
+    { atPercent: 82, type: "jackpot_wave", charge: 1800 },
+    { atPercent: 84, type: "luck_boost", multiplier: 40, durationSeconds: 24 },
+    { atPercent: 86, type: "cache_rain", multiplier: 8 },
     { atPercent: 88, type: "frenzy_burst" },
-    { atPercent: 90, type: "jackpot_wave", charge: 3800 },
-    { atPercent: 92, type: "boost_stack", multiplier: 60, durationSeconds: 32 },
-    { atPercent: 94, type: "luck_boost", multiplier: 320, durationSeconds: 22 },
+    { atPercent: 90, type: "jackpot_wave", charge: 2200 },
+    { atPercent: 92, type: "boost_stack", multiplier: 16, durationSeconds: 24 },
+    { atPercent: 94, type: "luck_boost", multiplier: 60, durationSeconds: 18 },
     { atPercent: 96, type: "spawn_everyone_event", eventId: "obsidian_1_5000" },
-    { atPercent: 97.6, type: "announce", message: "allezzzzz, soyez ready, la x500 arrive !!!" },
-    { atPercent: 98, type: "luck_boost", multiplier: 500, durationSeconds: 18 },
+    { atPercent: 97.6, type: "announce", message: "allezzzzz, soyez ready, le dernier pic arrive !!!" },
+    { atPercent: 98, type: "luck_boost", multiplier: 90, durationSeconds: 14 },
     { atPercent: 99, type: "spawn_share_event", eventId: "mystery_1_1000000", share: 0.01, countdownSeconds: 10 },
     { atPercent: 99.85, type: "announce", message: "finnn, merci l'ekipppp !!! bon app ducoup" },
     { at: "end", type: "roulette_event", excludeIds: [] }
@@ -6833,8 +6860,8 @@
         return 1;
       }
       const progress = getAdminAbuseProgress(nowMs);
-      const ramp = 1.2 + (Math.pow(progress, 1.18) * 12.8);
-      const surge = progress >= 0.72 ? 1 + ((progress - 0.72) * 18) : 1;
+      const ramp = 1.08 + (Math.pow(progress, 1.14) * 3.6);
+      const surge = progress >= 0.82 ? 1 + ((progress - 0.82) * 3.6) : 1;
       return ramp * surge;
     }
 
@@ -7027,7 +7054,7 @@
 
     function getActiveAdminLuckBoost(nowMs = Date.now()) {
       const phase = getAdminAbusePhase(nowMs);
-      const baseline = phase.state === "active" ? 3 : 1;
+      const baseline = phase.state === "active" ? 2 : 1;
       return adminLuckBoosts.reduce((highest, boost) => {
         if (boost.endsAt <= nowMs) {
           return highest;
@@ -7039,20 +7066,20 @@
     function getAdminEventLuckFactor(nowMs = Date.now()) {
       const adminLuck = Math.max(1, Number(getActiveAdminLuckBoost(nowMs)) || 1);
       const progress = getAdminAbuseProgress(nowMs);
-      const progressRamp = 1 + (Math.pow(progress, 1.24) * 8.5);
-      const peakRamp = progress >= 0.84 ? 1 + ((progress - 0.84) * 22) : 1;
+      const progressRamp = 1 + (Math.pow(progress, 1.16) * 2.8);
+      const peakRamp = progress >= 0.9 ? 1 + ((progress - 0.9) * 4) : 1;
       return Math.max(1, adminLuck * progressRamp * peakRamp);
     }
 
     function getAdminAdjustedGlobalRollDenominator(nowMs = Date.now()) {
       const luckFactor = getAdminEventLuckFactor(nowMs);
-      const reductionFactor = Math.max(1, Math.pow(luckFactor, 0.92));
+      const reductionFactor = Math.max(1, Math.pow(luckFactor, 0.66));
       return Math.max(1, Math.round(ORE_EVENT_GLOBAL_ROLL_DENOMINATOR / reductionFactor));
     }
 
     function getAdminAdjustedEventChanceDenominator(baseChance, nowMs = Date.now()) {
       const luckFactor = getAdminEventLuckFactor(nowMs);
-      const reductionFactor = Math.max(1, Math.pow(luckFactor, 0.82));
+      const reductionFactor = Math.max(1, Math.pow(luckFactor, 0.58));
       return Math.max(1, Math.round(Number(baseChance) / reductionFactor));
     }
 
@@ -7062,10 +7089,10 @@
         return ORE_EVENT_MIN_COOLDOWN_MS;
       }
       const progress = getAdminAbuseProgress(nowMs);
-      const cooldownFactor = progress >= 0.75
-        ? 0.22 - ((progress - 0.75) * 0.52)
-        : 1 - (progress * 1.02);
-      return Math.max(450, Math.round(ORE_EVENT_MIN_COOLDOWN_MS * cooldownFactor));
+      const cooldownFactor = progress >= 0.8
+        ? 0.5 - ((progress - 0.8) * 0.6)
+        : 1 - (progress * 0.62);
+      return Math.max(2200, Math.round(ORE_EVENT_MIN_COOLDOWN_MS * cooldownFactor));
     }
 
     function pruneAdminLuckBoosts(nowMs = Date.now()) {
@@ -7382,7 +7409,7 @@
         return "";
       }
       if (action.type === "boost_stack") {
-        return `Boost x${formatFactor(Number(action.multiplier) || 1, 1)} en approche, gardez la cadence.`;
+        return `Boost x${formatFactor(Number(action.multiplier) || 1, 1)} en approche.`;
       }
       if (action.type === "luck_boost") {
         return `Boost de luck x${Math.max(1, Math.round(Number(action.multiplier) || 1))} en approche.`;
@@ -7440,7 +7467,7 @@
       }
 
       adminAbuseRuntime.previewedActionId = upcomingAction.id;
-      setAdminAbuseBannerMessage(`Admin : ${description}`, 10, true);
+      showSystemPreview(description, 10);
       return true;
     }
 
@@ -7470,10 +7497,10 @@
         const isDone = Number.isFinite(endAt) && nowMs > endAt;
         const statusLabel = isLive ? "En cours" : isDone ? "Termine" : "A venir";
         const detail = isLive
-          ? `Fin dans ${formatDuration(endAt - nowMs)}`
+          ? `Compte a rebours: fin dans ${formatDuration(endAt - nowMs)}`
           : isDone
             ? `Termine a ${new Date(endAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`
-            : `Depart dans ${formatDuration(startAt - nowMs)}`;
+            : `Compte a rebours: debut dans ${formatDuration(startAt - nowMs)}`;
         return {
           ...entry,
           startAt,
@@ -8372,6 +8399,7 @@
       rankGoalValue: document.getElementById("rankGoalValue"),
       didYouKnowBox: document.getElementById("didYouKnowBox"),
       didYouKnowText: document.getElementById("didYouKnowText"),
+      systemPreview: document.getElementById("systemPreview"),
       toast: document.getElementById("toast"),
       screenFlash: document.getElementById("screenFlash"),
       globalAdminBanner: document.getElementById("globalAdminBanner"),
@@ -8469,6 +8497,7 @@
     let lastProgressSyncAt = 0;
     let hiddenRenderTimer = 0;
     let missionProgressDirtyAccumulator = 0;
+    let systemPreviewTimeout = null;
     let toastTimeout = null;
     let lastToastAt = 0;
     let lastToastMessage = "";
@@ -9819,6 +9848,24 @@
       ];
     }
 
+    function showSystemPreview(message, visibleSeconds = 10) {
+      if (!dom.systemPreview) {
+        return;
+      }
+      const safeMessage = withSystemPrefix(message);
+      if (!safeMessage) {
+        return;
+      }
+      dom.systemPreview.textContent = safeMessage;
+      dom.systemPreview.classList.add("show");
+      if (systemPreviewTimeout) {
+        clearTimeout(systemPreviewTimeout);
+      }
+      systemPreviewTimeout = window.setTimeout(() => {
+        dom.systemPreview.classList.remove("show");
+      }, Math.max(1, visibleSeconds) * 1000);
+    }
+
     function showToast(message) {
       const now = Date.now();
       if (message === lastToastMessage && (now - lastToastAt) < TOAST_MIN_INTERVAL_MS) {
@@ -11117,6 +11164,9 @@
       const currentDrop = getAdminAbuseDropMultiplier(nowMs);
       const currentCooldown = getAdminOreCooldownMs(nowMs);
       const currentIntensity = getAdminAbuseIntensityLabel(nowMs);
+      const adminDurationMs = adminWindow ? Math.max(0, adminWindow.endAt - adminWindow.startAt) : 0;
+      const adminRemainingMs = adminWindow ? Math.max(0, adminWindow.endAt - nowMs) : 0;
+      const adminStartsInMs = adminWindow ? Math.max(0, adminWindow.startAt - nowMs) : 0;
 
       const orderedEvents = [...ORE_EVENT_DEFS].sort((a, b) => b.chance - a.chance);
       const globalRollProbability = 1 / ORE_EVENT_GLOBAL_ROLL_DENOMINATOR;
@@ -11146,9 +11196,9 @@
       dom.infoEventTableBody.innerHTML = rows.join("");
       if (dom.infoAdminAbuseStatus) {
         if (adminPhase.state === "active" && adminWindow) {
-          dom.infoAdminAbuseStatus.textContent = `Admin abuse actif pendant 30 minutes. Intensite actuelle: ${currentIntensity}. Luck live x${currentLuck}, drop x${formatFactor(currentDrop, 2)}, cadence filons ${formatDuration(currentCooldown)}.`;
+          dom.infoAdminAbuseStatus.textContent = `Admin abuse actif encore ${formatDuration(adminRemainingMs)}. Duree totale: ${formatDuration(adminDurationMs)}. Intensite actuelle: ${currentIntensity}. Luck live x${currentLuck}, drop x${formatFactor(currentDrop, 2)}, cadence filons ${formatDuration(currentCooldown)}.`;
         } else if (adminPhase.state === "upcoming" && adminWindow) {
-          dom.infoAdminAbuseStatus.textContent = `Prochaine vague admin prevue le ${formatAdminAbuseScheduleRange(adminWindow.startAt, adminWindow.endAt)}. La vague est construite pour durer 30 minutes et finir sur un pic brutal.`;
+          dom.infoAdminAbuseStatus.textContent = `Prochaine vague admin dans ${formatDuration(adminStartsInMs)}. Fenetre prevue: ${formatAdminAbuseScheduleRange(adminWindow.startAt, adminWindow.endAt)}. Duree: ${formatDuration(adminDurationMs)}.`;
         } else if (adminPhase.state === "ending") {
           dom.infoAdminAbuseStatus.textContent = "Admin abuse en retombee. Les boosts admin se coupent progressivement apres la finale.";
         } else {
@@ -11156,7 +11206,7 @@
         }
       }
       if (dom.infoAdminAbuseDetail) {
-        dom.infoAdminAbuseDetail.textContent = "Paliers scripts: plusieurs pics de luck, stacks de boosts, waves jackpot/cache, filons partages et finale avec luck x500 pendant 10s puis Mystery Event pour 1% avant la roulette finale.";
+        dom.infoAdminAbuseDetail.textContent = "Paliers scripts reequilibres: plusieurs pics de luck, stacks de boosts plus propres, vagues jackpot/cache, filons partages et finale avec pic de luck contenu avant la roulette finale.";
       }
       if (dom.infoAdminAbuseEffects) {
         dom.infoAdminAbuseEffects.innerHTML = adminEffects.length
@@ -12595,6 +12645,7 @@
           dirty.hud = true;
           dirty.arcade = true;
           dirty.event = true;
+          dirty.info = true;
           hudTimer = 0;
         }
 
