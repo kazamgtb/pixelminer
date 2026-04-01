@@ -6603,10 +6603,10 @@
     const ADMIN_ABUSE_MIN_ACTION_GAP_MS = 8000;
     const ADMIN_ABUSE_CONFIG = {
   enabled: true,
-  startDate: "01/04/2026",
-  startTime: "21:41",
-  endDate: "01/04/2026",
-  endTime: "21:50",
+  startDate: "02/04/2026",
+  startTime: "11:50",
+  endDate: "02/04/2026",
+  endTime: "12:10",
 
   messages: [
     "ouesh les khey sa dis quoi",
@@ -7267,15 +7267,15 @@
 
     function setAdminAbuseBannerMessage(message, visibleSeconds = 12, toast = false, hotSeconds = visibleSeconds) {
       const safeMessage = String(message || "").trim();
-      const visibleUntil = Date.now() + (Math.max(1, visibleSeconds) * 1000);
-      const hotUntil = Date.now() + (Math.max(1, hotSeconds) * 1000);
       if (safeMessage && isSystemMessage(safeMessage)) {
         showToast(safeMessage, Math.max(1, visibleSeconds) * 1000);
-      } else {
-        adminAbuseRuntime.bannerMessage = safeMessage;
-        adminAbuseRuntime.bannerVisibleUntil = visibleUntil;
+        dirty.event = true;
+        dirty.hud = true;
+        return;
       }
-      adminAbuseRuntime.bannerHotUntil = hotUntil;
+      adminAbuseRuntime.bannerMessage = safeMessage;
+      adminAbuseRuntime.bannerVisibleUntil = Date.now() + (Math.max(1, visibleSeconds) * 1000);
+      adminAbuseRuntime.bannerHotUntil = Date.now() + (Math.max(1, hotSeconds) * 1000);
       dirty.event = true;
       dirty.hud = true;
     }
@@ -7407,9 +7407,7 @@
     function shutdownAdminAbuseEvents() {
       adminLuckBoosts = [];
       adminAbuseRuntime.countdown = null;
-      adminAbuseRuntime.bannerVisibleUntil = Date.now() + 8000;
-      adminAbuseRuntime.bannerHotUntil = Date.now() + 8000;
-      adminAbuseRuntime.bannerMessage = "System : l'admin abuse est termine, tous les events sont coupes.";
+      showToast("System : l'admin abuse est termine, tous les events sont coupes.", 8000);
       adminAbuseRuntime.wheelSpinning = false;
       if (adminAbuseRuntime.wheelResolveTimer) {
         clearTimeout(adminAbuseRuntime.wheelResolveTimer);
@@ -7845,20 +7843,16 @@
         return null;
       }
 
-      if (phase.state === "active") {
-        const message = String(adminAbuseRuntime.bannerMessage || "").trim();
-        if (nowMs > adminAbuseRuntime.bannerVisibleUntil) {
-          return null;
-        }
+      const message = String(adminAbuseRuntime.bannerMessage || "").trim();
+      if (message && nowMs <= adminAbuseRuntime.bannerVisibleUntil) {
         const noticeText = hasNoticePrefix(message) ? message : `Admin : ${message}`;
-        if (!isAdminMessage(noticeText)) {
-          return null;
+        if (isAdminMessage(noticeText)) {
+          return {
+            text: noticeText,
+            hot: true,
+            countdown: false
+          };
         }
-        return {
-          text: noticeText,
-          hot: true,
-          countdown: false
-        };
       }
 
       return null;
