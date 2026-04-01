@@ -6604,7 +6604,7 @@
     const ADMIN_ABUSE_CONFIG = {
   enabled: true,
   startDate: "01/04/2026",
-  startTime: "21:36",
+  startTime: "21:39",
   endDate: "01/04/2026",
   endTime: "21:45",
 
@@ -7267,12 +7267,15 @@
 
     function setAdminAbuseBannerMessage(message, visibleSeconds = 12, toast = false, hotSeconds = visibleSeconds) {
       const safeMessage = String(message || "").trim();
-      adminAbuseRuntime.bannerMessage = safeMessage;
-      adminAbuseRuntime.bannerVisibleUntil = Date.now() + (Math.max(1, visibleSeconds) * 1000);
-      adminAbuseRuntime.bannerHotUntil = Date.now() + (Math.max(1, hotSeconds) * 1000);
+      const visibleUntil = Date.now() + (Math.max(1, visibleSeconds) * 1000);
+      const hotUntil = Date.now() + (Math.max(1, hotSeconds) * 1000);
       if (safeMessage && isSystemMessage(safeMessage)) {
         showToast(safeMessage, Math.max(1, visibleSeconds) * 1000);
+      } else {
+        adminAbuseRuntime.bannerMessage = safeMessage;
+        adminAbuseRuntime.bannerVisibleUntil = visibleUntil;
       }
+      adminAbuseRuntime.bannerHotUntil = hotUntil;
       dirty.event = true;
       dirty.hud = true;
     }
