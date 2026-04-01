@@ -5350,6 +5350,80 @@
   animation: adminBannerPulse 0.8s steps(2, end) infinite;
 }
 
+.admin-effects-dock {
+  position: fixed;
+  left: 18px;
+  bottom: 18px;
+  width: min(320px, calc(100vw - 36px));
+  display: grid;
+  gap: 10px;
+  z-index: 142;
+  pointer-events: none;
+}
+
+.admin-effects-dock.hidden {
+  display: none;
+}
+
+.admin-effect-card {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 186, 120, 0.38);
+  background:
+    linear-gradient(180deg, rgba(51, 14, 16, 0.95), rgba(23, 7, 9, 0.98));
+  box-shadow: 0 16px 28px rgba(0, 0, 0, 0.3), 0 0 22px rgba(255, 88, 72, 0.14);
+}
+
+.admin-effect-card.hot {
+  border-color: rgba(255, 220, 143, 0.62);
+  box-shadow: 0 16px 28px rgba(0, 0, 0, 0.32), 0 0 26px rgba(255, 148, 92, 0.22);
+}
+
+.admin-effect-icon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 221, 170, 0.24);
+  background: linear-gradient(180deg, rgba(255, 244, 217, 0.1), rgba(255, 180, 120, 0.08));
+}
+
+.admin-effect-icon svg {
+  width: 32px;
+  height: 32px;
+  display: block;
+}
+
+.admin-effect-copy {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.admin-effect-copy strong,
+.admin-effect-copy span {
+  display: block;
+  min-width: 0;
+}
+
+.admin-effect-copy strong {
+  color: #fff0d2;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+}
+
+.admin-effect-copy span {
+  color: #ffcba8;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
 @keyframes adminBannerPulse {
   0%, 100% {
     transform: translateX(-50%) translateY(0);
@@ -5709,6 +5783,7 @@
 <body>
   <div class="global-admin-banner hidden" id="globalAdminBanner" aria-live="polite"></div>
   <div class="event-banner" id="eventBanner" aria-live="polite" style="display:none"></div>
+  <div class="admin-effects-dock hidden" id="adminEffectsDock" aria-live="polite"></div>
   
   <div class="app-shell">
     <aside class="didyouknow-box" id="didYouKnowBox" aria-live="polite">
@@ -6515,7 +6590,7 @@
     const AUTOCLICK_LOW_VARIANCE_INTERVAL_MS = 6;
     const AUTOCLICK_FAST_INTERVAL_CHAIN = 6;
     const AUTOCLICK_IMPOSSIBLE_INTERVAL_MS = 38;
-    const AUTOCLICK_ROBOTIC_AVG_INTERVAL_MS = 135;
+    const AUTOCLICK_ROBOTIC_AVG_INTERVAL_MS = 150;
     const AUTOCLICK_ROBOTIC_SPREAD_MS = 9;
     const AUTOCLICK_REPEATED_POSITION_DELTA = 6;
     const AUTOCLICK_SUSPICION_THRESHOLD = 100;
@@ -6529,9 +6604,9 @@
     const ADMIN_ABUSE_CONFIG = {
   enabled: true,
   startDate: "01/04/2026",
-  startTime: "21:21",
+  startTime: "21:32",
   endDate: "01/04/2026",
-  endTime: "21:30",
+  endTime: "21:40",
 
   messages: [
     "ouesh les khey sa dis quoi",
@@ -6602,6 +6677,7 @@
     { atPercent: 97.6, type: "announce", message: "allezzzzz, soyez ready, le dernier pic arrive !!!" },
     { atPercent: 98, type: "luck_boost", multiplier: 90, durationSeconds: 14 },
     { atPercent: 99, type: "spawn_share_event", eventId: "mystery_1_1000000", share: 0.01, countdownSeconds: 10 },
+    { atPercent: 99.75, type: "luck_boost", multiplier: 500, durationSeconds: 10 }
     { atPercent: 99.85, type: "announce", message: "finnn, merci l'ekipppp !!! bon app ducoup" },
     { at: "end", type: "roulette_event", excludeIds: [] }
   ]
@@ -6926,6 +7002,44 @@
       dirty.hud = true;
     }
 
+    function getAdminEffectVisual(effectLabel) {
+      const safeLabel = String(effectLabel || "").trim().toLowerCase();
+      if (safeLabel.includes("luck")) {
+        return { type: "crystal", hue: 196 };
+      }
+      if (safeLabel.includes("boost")) {
+        return { type: "gauntlet", hue: 142 };
+      }
+      if (safeLabel.includes("jackpot")) {
+        return { type: "ore_cart", hue: 42 };
+      }
+      if (safeLabel.includes("cache")) {
+        return { type: "falling_crystal", hue: 212 };
+      }
+      if (safeLabel.includes("frenesie")) {
+        return { type: "explosion", hue: 12 };
+      }
+      if (safeLabel.includes("roulette")) {
+        return { type: "time_capsule", hue: 300 };
+      }
+      if (safeLabel.includes("actif")) {
+        return { type: "pickaxe", hue: 54 };
+      }
+      return { type: "crystal", hue: 32 };
+    }
+
+    function getAdminEffectCards(nowMs = Date.now()) {
+      pruneAdminEffectBadges(nowMs);
+      return adminAbuseRuntime.activeEffects
+        .filter((effect) => effect.endsAt > nowMs)
+        .sort((a, b) => a.endsAt - b.endsAt)
+        .map((effect) => ({
+          ...effect,
+          remainingMs: Math.max(0, effect.endsAt - nowMs),
+          visual: getAdminEffectVisual(effect.label)
+        }));
+    }
+
     function getAdminAbuseAudioSources() {
       return ADMIN_ABUSE_AUDIO_SOURCES.map((src) => String(src || "").trim()).filter(Boolean);
     }
@@ -7158,8 +7272,6 @@
       adminAbuseRuntime.bannerHotUntil = Date.now() + (Math.max(1, hotSeconds) * 1000);
       if (safeMessage && isSystemMessage(safeMessage)) {
         showToast(safeMessage, Math.max(1, visibleSeconds) * 1000);
-      } else if (toast && safeMessage) {
-        showToast(safeMessage, Math.max(1, visibleSeconds) * 1000);
       }
       dirty.event = true;
       dirty.hud = true;
@@ -7177,7 +7289,7 @@
       return (customText || action?.type === "announce") ? `Admin : ${safeText}` : `System : ${safeText}`;
     }
 
-    function showAdminActionBannerMessage(action, fallbackText, visibleSeconds = 12, toast = false, hotSeconds = visibleSeconds) {
+    function showAdminActionBannerMessage(action, fallbackText, visibleSeconds = 10, toast = false, hotSeconds = visibleSeconds) {
       const bannerMessage = buildAdminActionBannerMessage(action, fallbackText);
       if (!bannerMessage) {
         return;
@@ -7505,7 +7617,7 @@
         const eventDefinition = getOreEventById(action.eventId);
         if (eventDefinition) {
           forceActivateOreEvent(eventDefinition, false);
-          showAdminActionBannerMessage(action, `${eventDefinition.name} active !`, 12, true);
+          showAdminActionBannerMessage(action, `${eventDefinition.name} active !`, 10, true);
         }
         return;
       }
@@ -8508,6 +8620,7 @@
       toast: document.getElementById("toast"),
       screenFlash: document.getElementById("screenFlash"),
       globalAdminBanner: document.getElementById("globalAdminBanner"),
+      adminEffectsDock: document.getElementById("adminEffectsDock"),
       hebsBanPage: document.getElementById("hebsBanPage"),
       hebsBanReason: document.getElementById("hebsBanReason"),
       hebsBanPenalty: document.getElementById("hebsBanPenalty"),
@@ -10277,8 +10390,8 @@
         return { hard: true, reason: "Cadence impossible detectee." };
       }
 
-      if (average <= AUTOCLICK_ROBOTIC_AVG_INTERVAL_MS && spread <= AUTOCLICK_ROBOTIC_SPREAD_MS && repeatedPosition) {
-        return { hard: true, reason: "Cadence robotique trop reguliere detectee." };
+      if (average <= AUTOCLICK_ROBOTIC_AVG_INTERVAL_MS && spread <= AUTOCLICK_ROBOTIC_SPREAD_MS) {
+        return { hard: true, reason: repeatedPosition ? "Cadence robotique trop reguliere detectee." : "Rythme de clic trop regulier detecte." };
       }
 
       if (average <= (AUTOCLICK_ROBOTIC_AVG_INTERVAL_MS + 20) && spread <= (AUTOCLICK_ROBOTIC_SPREAD_MS + 3)) {
@@ -11698,6 +11811,8 @@
         dom.statusChipRow.appendChild(span);
       }
 
+      renderAdminEffectsDock();
+
       dom.buyModeNote.textContent = state.buyAmount === "max"
         ? "Clic gauche = achat max, clic droit = amelio"
         : `Clic gauche = achat x${state.buyAmount}, clic droit = amelio`;
@@ -12126,38 +12241,34 @@
       }
     }
 
+    function renderAdminEffectsDock(nowMs = Date.now()) {
+      if (!dom.adminEffectsDock) {
+        return;
+      }
+      const cards = getAdminEffectCards(nowMs);
+      if (!cards.length) {
+        dom.adminEffectsDock.classList.add("hidden");
+        dom.adminEffectsDock.innerHTML = "";
+        return;
+      }
+      dom.adminEffectsDock.classList.remove("hidden");
+      dom.adminEffectsDock.innerHTML = cards.map((effect) => `
+        <article class="admin-effect-card${effect.hot ? " hot" : ""}">
+          <div class="admin-effect-icon">${iconSVG(effect.visual.type, effect.visual.hue)}</div>
+          <div class="admin-effect-copy">
+            <strong>${effect.label}</strong>
+            <span>${formatDuration(effect.remainingMs)}</span>
+          </div>
+        </article>
+      `).join("");
+    }
+
     function renderEvent() {
       renderGlobalAdminBanner();
       dom.eventBanner.classList.remove("hot", "admin-abuse", "admin-countdown", ...getEventThemeClasses());
-      const adminPhase = getAdminAbusePhase();
-      const adminEffects = getAdminAbuseStatusEffects();
-      if (adminPhase.state === "active") {
-        const title = getBottomAdminBannerTitle(adminAbuseRuntime.bannerMessage || "Admin : admin abuse en cours.");
-        const bannerEffects = adminEffects.length
-          ? adminEffects
-          : [{ label: "Vague admin en cours", hot: true }];
-        dom.eventBanner.classList.add("hot", "admin-abuse");
-        dom.eventBanner.style.display = "";
-        dom.eventBanner.innerHTML = `
-          <strong class="event-banner-title">${title}</strong>
-          <div class="event-banner-meta">
-            ${bannerEffects.map((effect) => `<span class="event-banner-chip${effect.hot ? " hot" : ""}">${effect.label}</span>`).join("")}
-          </div>
-        `;
-      } else if (adminPhase.state === "ending") {
-        dom.eventBanner.classList.add("hot", "admin-abuse");
-        dom.eventBanner.style.display = "";
-        dom.eventBanner.innerHTML = `
-          <strong class="event-banner-title">Admin : fin de vague, retombee en cours.</strong>
-          <div class="event-banner-meta">
-            <span class="event-banner-chip hot">Tous les boosts systeme sont en train de retomber</span>
-          </div>
-        `;
-      } else {
-        dom.eventBanner.textContent = "";
-        dom.eventBanner.innerHTML = "";
-        dom.eventBanner.style.display = "none";
-      }
+      dom.eventBanner.textContent = "";
+      dom.eventBanner.innerHTML = "";
+      dom.eventBanner.style.display = "none";
       state.activeEvent = null;
       dom.eventOrb.classList.add("hidden");
       dirty.event = false;
